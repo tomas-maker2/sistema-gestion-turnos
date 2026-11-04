@@ -27,6 +27,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<ServicioService>();
 
 // Autenticación con JWT: todos los endpoints exigen token salvo los marcados [AllowAnonymous]
 builder.Services.Configure<JwtOpciones>(builder.Configuration.GetSection("Jwt"));
