@@ -1,0 +1,43 @@
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-primary-container) 100%);
+}
+
+mat-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 16px;
+  background: var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level3);
+}
+
+.logo {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin: 8px auto 0;
+}
+
+.subtitulo {
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 8px 0 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.error {
+  color: var(--mat-sys-error);
+  margin: 0;
+}

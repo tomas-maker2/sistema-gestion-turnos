@@ -1,0 +1,38 @@
+// Colores de la barra (los botones de adentro los toman de estas variables de Material).
+// La barra crece si los elementos pasan a otra línea (pantallas angostas).
+mat-toolbar {
+  --mat-toolbar-container-background-color: var(--mat-sys-primary);
+  --mat-toolbar-container-text-color: var(--mat-sys-on-primary);
+  height: auto;
+  min-height: 64px;
+  padding-block: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+// Los botones de ícono de Material no toman el color de la barra por sí solos
+mat-toolbar button.mat-mdc-icon-button.mat-mdc-icon-button {
+  --mat-icon-button-icon-color: var(--mat-sys-on-primary);
+}
+
+.marca {
+  display: flex;
+  margin-right: 16px;
+
+  img {
+    height: 40px;
+    width: auto;
+  }
+}
+
+.espacio {
+  flex: 1;
+}
+
+.activo {
+  background: rgb(255 255 255 / 20%);
+}
+
+main {
+  padding: 16px;
+}

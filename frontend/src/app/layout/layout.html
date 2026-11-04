@@ -1,0 +1,27 @@
+<mat-toolbar>
+  <a class="marca" routerLink="/agenda">
+    <img src="logo-blanco.svg" alt="Gestión Turnos" />
+  </a>
+
+  <nav>
+    <a mat-button routerLink="/agenda" routerLinkActive="activo">Agenda</a>
+    <a mat-button routerLink="/clientes" routerLinkActive="activo">Clientes</a>
+    <a mat-button routerLink="/servicios" routerLinkActive="activo">Servicios</a>
+    @if (auth.esAdmin()) {
+      <a mat-button routerLink="/usuarios" routerLinkActive="activo">Usuarios</a>
+    }
+  </nav>
+
+  <span class="espacio"></span>
+
+  <button mat-icon-button type="button" aria-label="Mi perfil" matTooltip="Mi perfil" (click)="abrirPerfil()">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+  <button mat-icon-button type="button" aria-label="Cerrar sesión" matTooltip="Cerrar sesión" (click)="cerrarSesion()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<main>
+  <router-outlet />
+</main>

@@ -1,0 +1,41 @@
+.avatar {
+  display: block;
+  width: 72px;
+  height: 72px;
+  font-size: 72px;
+  margin: 0 auto;
+  color: var(--mat-sys-primary);
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 16px 0;
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.campos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.error {
+  color: var(--mat-sys-error);
+  margin: 0;
+}

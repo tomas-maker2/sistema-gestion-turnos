@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>Mi perfil</h2>
+
+<mat-dialog-content>
+  <mat-icon class="avatar">account_circle</mat-icon>
+
+  <dl class="datos">
+    <dt>Nombre</dt>
+    <dd>{{ sesion()?.nombreCompleto }}</dd>
+    <dt>Usuario</dt>
+    <dd>{{ sesion()?.nombreUsuario }}</dd>
+    <dt>Rol</dt>
+    <dd>{{ rol() }}</dd>
+  </dl>
+
+  @if (cambiando()) {
+    <form class="campos" [formGroup]="form" (ngSubmit)="enviar()">
+      <mat-form-field>
+        <mat-label>Contraseña actual</mat-label>
+        <input matInput type="password" formControlName="passwordActual" autocomplete="current-password" />
+        @if (form.controls.passwordActual.hasError('required')) {
+          <mat-error>Ingresá tu contraseña actual</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Contraseña nueva</mat-label>
+        <input matInput type="password" formControlName="passwordNueva" autocomplete="new-password" />
+        @if (form.controls.passwordNueva.hasError('minlength')) {
+          <mat-error>Tiene que tener al menos 8 caracteres</mat-error>
+        } @else if (form.controls.passwordNueva.hasError('required')) {
+          <mat-error>Ingresá la contraseña nueva</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Repetir contraseña nueva</mat-label>
+        <input matInput type="password" formControlName="confirmacion" autocomplete="new-password" />
+      </mat-form-field>
+
+      @if (form.hasError('noCoinciden') && form.controls.confirmacion.touched) {
+        <p class="error" role="alert">Las contraseñas no coinciden</p>
+      }
+      @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
+      }
+
+      <div class="acciones">
+        <button mat-button type="button" (click)="cancelarCambio()">Cancelar</button>
+        <button mat-flat-button type="submit">Guardar</button>
+      </div>
+    </form>
+  } @else {
+    <button mat-stroked-button type="button" (click)="cambiando.set(true)">Cambiar contraseña</button>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>
