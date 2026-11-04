@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using GestionTurnos.Api.Data;
 using GestionTurnos.Api.Errors;
 using GestionTurnos.Api.Models;
@@ -13,7 +14,9 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+// Los enums (Rol, Estado) viajan como texto en el JSON
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddDbContext<AppDbContext>(o =>
     o.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddExceptionHandler<ManejadorErrores>();
@@ -23,6 +26,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UsuarioService>();
 
 // Autenticación con JWT: todos los endpoints exigen token salvo los marcados [AllowAnonymous]
 builder.Services.Configure<JwtOpciones>(builder.Configuration.GetSection("Jwt"));

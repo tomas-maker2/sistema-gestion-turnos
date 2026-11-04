@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using GestionTurnos.Api.Dtos;
+using GestionTurnos.Api.Seguridad;
 using GestionTurnos.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +17,7 @@ public class AuthController(AuthService servicio) : ControllerBase
     [HttpPost("cambiar-password")]
     public async Task<IActionResult> CambiarPassword(CambiarPasswordRequest pedido)
     {
-        var idUsuario = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        await servicio.CambiarPasswordAsync(idUsuario, pedido);
+        await servicio.CambiarPasswordAsync(User.IdUsuario(), pedido);
         return NoContent();
     }
 }
