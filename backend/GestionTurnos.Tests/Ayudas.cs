@@ -21,4 +21,22 @@ public static class Ayudas
         await db.SaveChangesAsync();
         return usuario;
     }
+
+    public static async Task<Cliente> CrearCliente(
+        AppDbContext db, string nombre = "Luis", string apellido = "Gómez", bool activo = true)
+    {
+        var cliente = new Cliente { Nombre = nombre, Apellido = apellido, Telefono = "1111", Activo = activo };
+        db.Clientes.Add(cliente);
+        await db.SaveChangesAsync();
+        return cliente;
+    }
+
+    public static async Task<Servicio> CrearServicio(
+        AppDbContext db, string nombre = "Corte", int minutos = 30, bool activo = true)
+    {
+        var servicio = new Servicio { Nombre = nombre, DuracionMinutos = minutos, Activo = activo };
+        db.Servicios.Add(servicio);
+        await db.SaveChangesAsync();
+        return servicio;
+    }
 }
