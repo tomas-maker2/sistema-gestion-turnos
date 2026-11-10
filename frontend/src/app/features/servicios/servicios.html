@@ -1,0 +1,32 @@
+<section class="listado">
+  <div class="encabezado">
+    <h1>Servicios</h1>
+    <button mat-flat-button type="button" (click)="nuevo()">
+      <mat-icon>add</mat-icon>
+      Nuevo servicio
+    </button>
+  </div>
+
+  <div class="filtros">
+    <mat-slide-toggle [checked]="inactivos()" (change)="mostrarInactivos($event.checked)">
+      Mostrar inactivos
+    </mat-slide-toggle>
+  </div>
+
+  <app-grilla [columnas]="columnas" [filas]="filas()" mensajeVacio="No hay servicios.">
+    <ng-template #acciones let-s>
+      <button mat-icon-button type="button" aria-label="Editar" matTooltip="Editar" (click)="editar(s)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      @if (s.activo) {
+        <button mat-icon-button type="button" aria-label="Desactivar" matTooltip="Desactivar" (click)="desactivar(s)">
+          <mat-icon>block</mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button type="button" aria-label="Reactivar" matTooltip="Reactivar" (click)="reactivar(s)">
+          <mat-icon>restore</mat-icon>
+        </button>
+      }
+    </ng-template>
+  </app-grilla>
+</section>

@@ -1,0 +1,36 @@
+<section class="listado">
+  <div class="encabezado">
+    <h1>Clientes</h1>
+    <button mat-flat-button type="button" (click)="nuevo()">
+      <mat-icon>add</mat-icon>
+      Nuevo cliente
+    </button>
+  </div>
+
+  <div class="filtros">
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Buscar por nombre o apellido</mat-label>
+      <input matInput #buscador [value]="texto()" (input)="buscar(buscador.value)" autocomplete="off" />
+    </mat-form-field>
+    <mat-slide-toggle [checked]="inactivos()" (change)="mostrarInactivos($event.checked)">
+      Mostrar inactivos
+    </mat-slide-toggle>
+  </div>
+
+  <app-grilla [columnas]="columnas" [filas]="filas()" mensajeVacio="No hay clientes.">
+    <ng-template #acciones let-c>
+      <button mat-icon-button type="button" aria-label="Editar" matTooltip="Editar" (click)="editar(c)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      @if (c.activo) {
+        <button mat-icon-button type="button" aria-label="Desactivar" matTooltip="Desactivar" (click)="desactivar(c)">
+          <mat-icon>block</mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button type="button" aria-label="Reactivar" matTooltip="Reactivar" (click)="reactivar(c)">
+          <mat-icon>restore</mat-icon>
+        </button>
+      }
+    </ng-template>
+  </app-grilla>
+</section>

@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../core/auth.service';
+import { etiquetaRol } from '../shared/roles';
 
 // La confirmación tiene que ser igual a la clave nueva
 const coinciden = (grupo: AbstractControl) =>
@@ -26,7 +27,10 @@ export class PerfilDialog {
   private readonly aviso = inject(MatSnackBar);
 
   readonly sesion = this.auth.sesion;
-  readonly rol = computed(() => (this.sesion()?.rol === 'Admin' ? 'Administrador' : 'Operador'));
+  readonly rol = computed(() => {
+    const rol = this.sesion()?.rol;
+    return rol ? etiquetaRol(rol) : '';
+  });
   readonly cambiando = signal(false);
 
   readonly form = inject(FormBuilder).nonNullable.group(

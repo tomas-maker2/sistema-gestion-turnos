@@ -1,0 +1,30 @@
+<section class="listado">
+  <div class="encabezado">
+    <h1>Usuarios</h1>
+    <button mat-flat-button type="button" (click)="nuevo()">
+      <mat-icon>add</mat-icon>
+      Nuevo usuario
+    </button>
+  </div>
+
+  <app-grilla [columnas]="columnas" [filas]="filas()" mensajeVacio="No hay usuarios.">
+    <ng-template #acciones let-u>
+      <button mat-icon-button type="button" aria-label="Editar" matTooltip="Editar" (click)="editar(u)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button type="button" aria-label="Restablecer contraseña" matTooltip="Restablecer contraseña"
+              (click)="restablecerPassword(u)">
+        <mat-icon>key</mat-icon>
+      </button>
+      @if (u.activo) {
+        <button mat-icon-button type="button" aria-label="Desactivar" matTooltip="Desactivar" (click)="desactivar(u)">
+          <mat-icon>block</mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button type="button" aria-label="Reactivar" matTooltip="Reactivar" (click)="reactivar(u)">
+          <mat-icon>restore</mat-icon>
+        </button>
+      }
+    </ng-template>
+  </app-grilla>
+</section>

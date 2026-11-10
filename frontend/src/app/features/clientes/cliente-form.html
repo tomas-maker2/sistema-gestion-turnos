@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>{{ esNuevo ? 'Nuevo cliente' : 'Editar cliente' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()">
+  <mat-dialog-content class="formulario-dialogo">
+    <mat-form-field>
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre" autocomplete="off" maxlength="100" />
+      @if (form.controls.nombre.hasError('required')) {
+        <mat-error>Ingresá el nombre</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Apellido</mat-label>
+      <input matInput formControlName="apellido" autocomplete="off" maxlength="100" />
+      @if (form.controls.apellido.hasError('required')) {
+        <mat-error>Ingresá el apellido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Teléfono</mat-label>
+      <input matInput type="tel" formControlName="telefono" autocomplete="off" maxlength="30" />
+      @if (form.controls.telefono.hasError('required')) {
+        <mat-error>Ingresá un teléfono</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Email (opcional)</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="off" maxlength="150" />
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>El email no es válido</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="mensaje-error" role="alert">{{ error() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+  </mat-dialog-actions>
+</form>

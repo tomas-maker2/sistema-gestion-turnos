@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>{{ esNuevo ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()">
+  <mat-dialog-content class="formulario-dialogo">
+    <mat-form-field>
+      <mat-label>Usuario</mat-label>
+      <input matInput formControlName="nombreUsuario" autocomplete="off" maxlength="50" />
+      @if (form.controls.nombreUsuario.hasError('required')) {
+        <mat-error>Ingresá el nombre de usuario</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="nombreCompleto" autocomplete="off" maxlength="100" />
+      @if (form.controls.nombreCompleto.hasError('required')) {
+        <mat-error>Ingresá el nombre completo</mat-error>
+      }
+    </mat-form-field>
+
+    @if (esNuevo) {
+      <mat-form-field>
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="new-password" />
+        @if (form.controls.password.hasError('minlength')) {
+          <mat-error>Tiene que tener al menos 8 caracteres</mat-error>
+        } @else if (form.controls.password.hasError('required')) {
+          <mat-error>Ingresá una contraseña</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <mat-form-field>
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="rol">
+        @for (r of roles; track r.valor) {
+          <mat-option [value]="r.valor">{{ r.texto }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="mensaje-error" role="alert">{{ error() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+  </mat-dialog-actions>
+</form>

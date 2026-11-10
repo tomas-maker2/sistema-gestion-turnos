@@ -36,4 +36,46 @@ body {
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+// Formularios dentro de diálogos (usuario, cliente, servicio, restablecer contraseña)
+mat-dialog-content.formulario-dialogo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.mensaje-error {
+  color: var(--mat-sys-error);
+  margin: 0;
+}
+
+// Pantallas de listado (usuarios, clientes, servicios)
+.listado {
+  .encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    margin: 0;
+    font: var(--mat-sys-headline-small);
+  }
+
+  .filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 8px;
+
+    mat-form-field {
+      flex: 1 1 280px;
+      max-width: 420px;
+    }
+  }
+
+}

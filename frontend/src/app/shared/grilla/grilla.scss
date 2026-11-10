@@ -1,0 +1,88 @@
+// Encabezado en el azul principal y cuerpo en un celeste suave: dos colores bien distintos
+.contenedor {
+  border-radius: 12px;
+  overflow-x: auto;
+  background: color-mix(in srgb, var(--mat-sys-primary-container) 38%, var(--mat-sys-surface));
+  box-shadow: var(--mat-sys-level1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead tr {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+th {
+  padding: 10px 16px;
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 4px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+}
+
+tbody tr {
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-primary-container) 75%, var(--mat-sys-surface));
+  }
+
+  // Las filas inactivas se ven atenuadas, pero la etiqueta de estado se mantiene legible
+  &.inactiva td:not(:has(.estado)):not(.acciones) {
+    opacity: 0.55;
+  }
+}
+
+.acciones {
+  text-align: right;
+  white-space: nowrap;
+}
+
+// Los botones de ícono vienen de cada pantalla (contenido proyectado): se achican acá para todas
+:host ::ng-deep .acciones .mat-mdc-icon-button.mat-mdc-icon-button {
+  --mat-icon-button-state-layer-size: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.estado {
+  display: inline-block;
+  padding: 1px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+
+  &.activo {
+    background: #d6f0dd;
+    color: #14532d;
+  }
+
+  &.inactivo {
+    background: #e3e3e8;
+    color: #4a4a52;
+  }
+}
+
+.vacio {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}

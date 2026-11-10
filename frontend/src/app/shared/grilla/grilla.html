@@ -1,0 +1,39 @@
+<div class="contenedor">
+  <table>
+    <thead>
+      <tr>
+        @for (columna of columnas(); track columna.titulo) {
+          <th scope="col">{{ columna.titulo }}</th>
+        }
+        <th scope="col">Estado</th>
+        @if (acciones()) {
+          <th scope="col" class="acciones">Acciones</th>
+        }
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (fila of filas(); track fila) {
+        <tr [class.inactiva]="!fila.activo">
+          @for (columna of columnas(); track columna.titulo) {
+            <td>{{ columna.valor(fila) }}</td>
+          }
+          <td>
+            <span class="estado" [class.activo]="fila.activo" [class.inactivo]="!fila.activo">
+              {{ fila.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          @if (acciones(); as plantilla) {
+            <td class="acciones">
+              <ng-container [ngTemplateOutlet]="plantilla" [ngTemplateOutletContext]="{ $implicit: fila }" />
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  @if (filas().length === 0) {
+    <p class="vacio">{{ mensajeVacio() }}</p>
+  }
+</div>
