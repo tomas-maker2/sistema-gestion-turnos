@@ -3,7 +3,7 @@
 <mat-dialog-content>{{ datos.mensaje }}</mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" [mat-dialog-close]="false">Cancelar</button>
+  <button mat-button type="button" [mat-dialog-close]="false">{{ datos.textoCancelar ?? 'Cancelar' }}</button>
   <button mat-flat-button type="button" [mat-dialog-close]="true" cdkFocusInitial>
     {{ datos.textoConfirmar ?? 'Confirmar' }}
   </button>

@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>{{ esNuevo ? 'Nuevo turno' : 'Editar turno' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()">
+  <mat-dialog-content class="formulario-dialogo">
+    <mat-form-field>
+      <mat-label>Cliente</mat-label>
+      <input matInput formControlName="cliente" [matAutocomplete]="listaClientes" autocomplete="off"
+             placeholder="Buscar por nombre o apellido" />
+      <mat-autocomplete #listaClientes="matAutocomplete" [displayWith]="mostrarCliente">
+        @for (c of clientes(); track c.id) {
+          <mat-option [value]="c">{{ c.texto }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (form.controls.cliente.invalid) {
+        <mat-error>Elegí un cliente de la lista</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Servicio</mat-label>
+      <mat-select formControlName="servicioId">
+        @for (s of servicios(); track s.id) {
+          <mat-option [value]="s.id">{{ s.texto }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.servicioId.invalid) {
+        <mat-error>Elegí un servicio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Fecha y hora</mat-label>
+      <input matInput type="datetime-local" formControlName="fechaHora" />
+      @if (finEstimado(); as fin) {
+        <mat-hint>Termina a las {{ fin }}</mat-hint>
+      }
+      @if (form.controls.fechaHora.invalid) {
+        <mat-error>Ingresá la fecha y la hora</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Observaciones (opcional)</mat-label>
+      <textarea matInput formControlName="observaciones" rows="2" maxlength="500"></textarea>
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="mensaje-error" role="alert">{{ error() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+  </mat-dialog-actions>
+</form>

@@ -6,6 +6,7 @@ export interface ConfirmarDatos {
   titulo: string;
   mensaje: string;
   textoConfirmar?: string;
+  textoCancelar?: string;
 }
 
 // Modal de confirmación: se cierra con true si el usuario confirma y con false si cancela

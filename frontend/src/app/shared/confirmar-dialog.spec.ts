@@ -34,4 +34,9 @@ describe('ConfirmarDialog', () => {
     const el = await crear({ titulo: 'T', mensaje: 'M', textoConfirmar: 'Logout' });
     expect(botones(el)).toEqual(['Cancelar', 'Logout']);
   });
+
+  it('el_boton_de_cancelar_usa_el_texto_indicado', async () => {
+    const el = await crear({ titulo: 'T', mensaje: 'M', textoConfirmar: 'Cancelar turno', textoCancelar: 'Volver' });
+    expect(botones(el)).toEqual(['Volver', 'Cancelar turno']);
+  });
 });

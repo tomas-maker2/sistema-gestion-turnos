@@ -1,0 +1,72 @@
+<section class="listado">
+  <div class="encabezado">
+    <h1>Agenda</h1>
+    <button mat-flat-button type="button" (click)="nuevo()">
+      <mat-icon>add</mat-icon>
+      Nuevo turno
+    </button>
+  </div>
+
+  <div class="controles">
+    <div class="navegacion">
+      <button mat-icon-button type="button" aria-label="Anterior" matTooltip="Anterior" (click)="anterior()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-stroked-button type="button" (click)="hoy()">Hoy</button>
+      <button mat-icon-button type="button" aria-label="Siguiente" matTooltip="Siguiente" (click)="siguiente()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <strong class="rango">{{ titulo() }}</strong>
+    </div>
+
+    <input class="selector-fecha" type="date" #selector [value]="fechaTexto()" (change)="irAFecha(selector.value)"
+           aria-label="Ir a una fecha" />
+
+    <mat-button-toggle-group aria-label="Vista" [value]="vista()" (change)="cambiarVista($event.value)">
+      <mat-button-toggle value="dia">Día</mat-button-toggle>
+      <mat-button-toggle value="semana">Semana</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  @for (grupo of grupos(); track grupo.fecha) {
+    <section class="dia">
+      <h2>{{ grupo.titulo }}</h2>
+
+      @for (t of grupo.turnos; track t.id) {
+        <article class="turno" [class.cancelado]="t.estado === 'Cancelado'">
+          <div class="horario">
+            <strong>{{ hora(t.fechaHoraInicio) }}</strong>
+            <span>{{ hora(t.fechaHoraFin) }}</span>
+          </div>
+
+          <div class="detalle">
+            <div class="cliente">{{ t.clienteNombre }}</div>
+            <div class="servicio">{{ t.servicioNombre }}</div>
+            @if (t.observaciones) {
+              <div class="observaciones">{{ t.observaciones }}</div>
+            }
+          </div>
+
+          <span class="estado" [class]="'estado ' + t.estado.toLowerCase()">{{ t.estado }}</span>
+
+          <div class="acciones">
+            @if (t.estado === 'Pendiente') {
+              <button mat-icon-button type="button" aria-label="Editar" matTooltip="Editar" (click)="editar(t)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" aria-label="Marcar como atendido" matTooltip="Marcar como atendido"
+                      (click)="marcarAtendido(t)">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              <button mat-icon-button type="button" aria-label="Cancelar turno" matTooltip="Cancelar turno" (click)="cancelar(t)">
+                <mat-icon>event_busy</mat-icon>
+              </button>
+            }
+          </div>
+        </article>
+      } @empty {
+        <p class="vacio">{{ vista() === 'dia' ? 'No hay turnos para este día.' : 'Sin turnos' }}</p>
+      }
+    </section>
+  }
+</section>
