@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { ConfirmarDialog } from '../../shared/confirmar-dialog';
 import { mensajeDeError } from '../../shared/errores';
 import { ColumnaGrilla, Grilla } from '../../shared/grilla/grilla';
+import { CambioDePagina, EstadoPaginado, Pagina } from '../../shared/paginado';
 import { etiquetaRol } from '../../shared/roles';
 import { ResetearPasswordDialog } from './resetear-password-dialog';
 import { UsuarioForm } from './usuario-form';
@@ -31,16 +32,22 @@ export class Usuarios {
     { titulo: 'Rol', valor: (u) => etiquetaRol(u.rol) },
   ];
   readonly filas = signal<Usuario[]>([]);
+  readonly paginado = new EstadoPaginado();
 
   constructor() {
     this.cargar();
   }
 
   cargar(): void {
-    this.servicio.listar().subscribe({
-      next: (usuarios) => this.filas.set(usuarios),
+    this.servicio.listar(this.paginado.pagina(), this.paginado.tamanio()).subscribe({
+      next: (pagina) => this.mostrar(pagina),
       error: (e: HttpErrorResponse) => this.avisarError(e),
     });
+  }
+
+  cambiarPagina(cambio: CambioDePagina): void {
+    this.paginado.cambiar(cambio);
+    this.cargar();
   }
 
   nuevo(): void {
@@ -78,6 +85,12 @@ export class Usuarios {
   reactivar(usuario: Usuario): void {
     const datos = { nombreCompleto: usuario.nombreCompleto, rol: usuario.rol, activo: true };
     this.ejecutar(this.servicio.modificar(usuario.id, datos), 'Usuario reactivado');
+  }
+
+  private mostrar(pagina: Pagina<Usuario>): void {
+    this.filas.set(pagina.items);
+    // Si la página quedó vacía (se dio de baja lo último que tenía), se pide la anterior
+    if (this.paginado.actualizar(pagina.total, pagina.items.length)) this.cargar();
   }
 
   private abrirFormulario(usuario: Usuario | null): void {

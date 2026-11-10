@@ -8,12 +8,10 @@ namespace GestionTurnos.Api.Services;
 
 public class ServicioService(AppDbContext db)
 {
-    public async Task<List<ServicioDto>> ListarAsync(bool incluirInactivos) =>
-        await db.Servicios
-            .Where(s => incluirInactivos || s.Activo)
-            .OrderBy(s => s.Nombre)
-            .Select(s => Mapear(s))
-            .ToListAsync();
+    public Task<PaginaDto<ServicioDto>> ListarAsync(bool incluirInactivos, int pagina, int tamanio) =>
+        Paginacion.PaginarAsync(
+            db.Servicios.Where(s => incluirInactivos || s.Activo).OrderBy(s => s.Nombre),
+            pagina, tamanio, Mapear);
 
     public async Task<ServicioDto> ObtenerAsync(int id) => Mapear(await BuscarAsync(id));
 

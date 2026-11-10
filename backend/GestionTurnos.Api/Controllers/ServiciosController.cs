@@ -10,7 +10,9 @@ namespace GestionTurnos.Api.Controllers;
 public class ServiciosController(ServicioService servicio) : ControllerBase
 {
     [HttpGet]
-    public Task<List<ServicioDto>> Listar(bool incluirInactivos = false) => servicio.ListarAsync(incluirInactivos);
+    public Task<PaginaDto<ServicioDto>> Listar(
+        bool incluirInactivos = false, int pagina = 1, int tamanio = Paginacion.TamanioPorDefecto) =>
+        servicio.ListarAsync(incluirInactivos, pagina, tamanio);
 
     [HttpGet("{id:int}")]
     public Task<ServicioDto> Obtener(int id) => servicio.ObtenerAsync(id);

@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,9 +15,10 @@ describe('Servicios', () => {
 
   const corte: Servicio = { id: 1, nombre: 'Corte de pelo', duracionMinutos: 30, activo: true };
   const color: Servicio = { id: 2, nombre: 'Coloración', duracionMinutos: 90, activo: false };
+  const pagina = (items: Servicio[], total = items.length) => ({ items, total, pagina: 1, tamanio: 5 });
 
   async function crear() {
-    servicio = { listar: vi.fn().mockReturnValue(of([corte, color])), desactivar: vi.fn(), modificar: vi.fn() };
+    servicio = { listar: vi.fn().mockReturnValue(of(pagina([corte, color]))), desactivar: vi.fn(), modificar: vi.fn() };
     dialogo = { open: vi.fn() };
     aviso = { open: vi.fn() };
     TestBed.configureTestingModule({
@@ -39,7 +40,7 @@ describe('Servicios', () => {
 
   it('carga_solo_los_servicios_activos_por_defecto', async () => {
     await crear();
-    expect(servicio.listar).toHaveBeenCalledWith(false);
+    expect(servicio.listar).toHaveBeenCalledWith(false, 1, 5);
   });
 
   it('muestra_el_nombre_y_la_duracion_en_minutos', async () => {
@@ -65,12 +66,50 @@ describe('Servicios', () => {
 
     fixture.componentInstance.mostrarInactivos(true);
 
-    expect(servicio.listar).toHaveBeenLastCalledWith(true);
+    expect(servicio.listar).toHaveBeenLastCalledWith(true, 1, 5);
+  });
+
+  it('cambiar_de_pagina_o_de_tamanio_recarga_manteniendo_el_filtro', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.mostrarInactivos(true);
+
+    fixture.componentInstance.cambiarPagina({ pagina: 2, tamanio: 10 });
+
+    expect(servicio.listar).toHaveBeenLastCalledWith(true, 2, 10);
+  });
+
+  it('mostrar_inactivos_vuelve_a_la_primera_pagina_pero_conserva_el_tamanio', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.cambiarPagina({ pagina: 3, tamanio: 10 });
+
+    fixture.componentInstance.mostrarInactivos(true);
+
+    expect(servicio.listar).toHaveBeenLastCalledWith(true, 1, 10);
+  });
+
+  it('la_grilla_muestra_el_total_que_informa_la_API', async () => {
+    const fixture = await crear();
+    servicio.listar.mockReturnValue(of(pagina([corte], 23)));
+
+    fixture.componentInstance.cargar();
+
+    expect(fixture.componentInstance.paginado.total()).toBe(23);
+  });
+
+  it('si_la_pagina_queda_vacia_pide_la_ultima_que_tiene_datos', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.cambiarPagina({ pagina: 3, tamanio: 5 });
+    servicio.listar.mockReturnValueOnce(of(pagina([], 10)));
+    servicio.listar.mockReturnValueOnce(of(pagina([corte], 10)));
+
+    fixture.componentInstance.cargar();
+
+    expect(servicio.listar).toHaveBeenLastCalledWith(false, 2, 5);
   });
 
   it('avisa_si_no_hay_servicios', async () => {
     const fixture = await crear();
-    servicio.listar.mockReturnValue(of([]));
+    servicio.listar.mockReturnValue(of(pagina([])));
 
     fixture.componentInstance.cargar();
     await fixture.whenStable();

@@ -46,9 +46,28 @@ public class UsuarioServiceTests
         await Ayudas.CrearUsuario(_db, "ana", activo: false);
         await Ayudas.CrearUsuario(_db, "beto");
 
-        var lista = await _servicio.ListarAsync();
+        var lista = await _servicio.ListarAsync(1, 5);
 
-        Assert.Equal(["ana", "beto", "carla"], lista.Select(u => u.NombreUsuario));
+        Assert.Equal(["ana", "beto", "carla"], lista.Items.Select(u => u.NombreUsuario));
+    }
+
+    [Fact]
+    public async Task Listar_pagina_los_resultados_ordenados_y_devuelve_el_total()
+    {
+        for (var i = 1; i <= 7; i++) await Ayudas.CrearUsuario(_db, $"u{i}");
+
+        var primera = await _servicio.ListarAsync(1, 5);
+        var segunda = await _servicio.ListarAsync(2, 5);
+
+        Assert.Equal(["u1", "u2", "u3", "u4", "u5"], primera.Items.Select(u => u.NombreUsuario));
+        Assert.Equal(["u6", "u7"], segunda.Items.Select(u => u.NombreUsuario));
+        Assert.Equal(7, primera.Total);
+    }
+
+    [Fact]
+    public async Task Listar_con_tamanio_no_permitido_lanza_Validacion()
+    {
+        await Assert.ThrowsAsync<ValidacionException>(() => _servicio.ListarAsync(1, 20));
     }
 
     [Fact]

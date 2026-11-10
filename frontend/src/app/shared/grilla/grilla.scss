@@ -1,3 +1,15 @@
+// El paginador va arriba de la tabla y pegado a la izquierda (Material lo alinea a la derecha)
+:host ::ng-deep .paginador {
+  background: transparent;
+  font-size: 13px;
+
+  .mat-mdc-paginator-container {
+    justify-content: flex-start;
+    padding-left: 0;
+    min-height: 48px;
+  }
+}
+
 // Encabezado en el azul principal y cuerpo en un celeste suave: dos colores bien distintos
 .contenedor {
   border-radius: 12px;

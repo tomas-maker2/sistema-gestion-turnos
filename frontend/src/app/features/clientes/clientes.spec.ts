@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,9 +15,10 @@ describe('Clientes', () => {
 
   const ana: Cliente = { id: 1, nombre: 'Ana', apellido: 'Pérez', telefono: '1111', email: 'ana@mail.com', activo: true };
   const luis: Cliente = { id: 2, nombre: 'Luis', apellido: 'Gómez', telefono: '2222', email: null, activo: false };
+  const pagina = (items: Cliente[], total = items.length) => ({ items, total, pagina: 1, tamanio: 5 });
 
   async function crear() {
-    servicio = { listar: vi.fn().mockReturnValue(of([ana, luis])), desactivar: vi.fn(), modificar: vi.fn() };
+    servicio = { listar: vi.fn().mockReturnValue(of(pagina([ana, luis]))), desactivar: vi.fn(), modificar: vi.fn() };
     dialogo = { open: vi.fn() };
     aviso = { open: vi.fn() };
     TestBed.configureTestingModule({
@@ -40,7 +41,7 @@ describe('Clientes', () => {
 
   it('carga_los_clientes_activos_por_defecto', async () => {
     await crear();
-    expect(servicio.listar).toHaveBeenCalledWith('', false);
+    expect(servicio.listar).toHaveBeenCalledWith('', false, 1, 5);
   });
 
   it('muestra_apellido_y_nombre_telefono_y_email', async () => {
@@ -68,7 +69,7 @@ describe('Clientes', () => {
 
     fixture.componentInstance.buscar('ana');
 
-    expect(ultimaLlamada()).toEqual(['ana', false]);
+    expect(ultimaLlamada()).toEqual(['ana', false, 1, 5]);
   });
 
   it('mostrar_inactivos_recarga_incluyendolos', async () => {
@@ -76,7 +77,7 @@ describe('Clientes', () => {
 
     fixture.componentInstance.mostrarInactivos(true);
 
-    expect(ultimaLlamada()).toEqual(['', true]);
+    expect(ultimaLlamada()).toEqual(['', true, 1, 5]);
   });
 
   it('buscar_y_mostrar_inactivos_se_combinan', async () => {
@@ -85,12 +86,60 @@ describe('Clientes', () => {
     fixture.componentInstance.buscar('go');
     fixture.componentInstance.mostrarInactivos(true);
 
-    expect(ultimaLlamada()).toEqual(['go', true]);
+    expect(ultimaLlamada()).toEqual(['go', true, 1, 5]);
+  });
+
+  it('cambiar_de_pagina_o_de_tamanio_recarga_manteniendo_los_filtros', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.buscar('an');
+    fixture.componentInstance.mostrarInactivos(true);
+
+    fixture.componentInstance.cambiarPagina({ pagina: 2, tamanio: 10 });
+
+    expect(ultimaLlamada()).toEqual(['an', true, 2, 10]);
+  });
+
+  it('buscar_vuelve_a_la_primera_pagina_pero_conserva_el_tamanio', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.cambiarPagina({ pagina: 3, tamanio: 10 });
+
+    fixture.componentInstance.buscar('ana');
+
+    expect(ultimaLlamada()).toEqual(['ana', false, 1, 10]);
+  });
+
+  it('mostrar_inactivos_vuelve_a_la_primera_pagina', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.cambiarPagina({ pagina: 4, tamanio: 5 });
+
+    fixture.componentInstance.mostrarInactivos(true);
+
+    expect(ultimaLlamada()).toEqual(['', true, 1, 5]);
+  });
+
+  it('la_grilla_muestra_el_total_que_informa_la_API', async () => {
+    const fixture = await crear();
+    servicio.listar.mockReturnValue(of(pagina([ana], 23)));
+
+    fixture.componentInstance.buscar('a');
+
+    expect(fixture.componentInstance.paginado.total()).toBe(23);
+  });
+
+  it('si_la_pagina_queda_vacia_pide_la_ultima_que_tiene_datos', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.cambiarPagina({ pagina: 3, tamanio: 5 });
+    servicio.listar.mockReturnValueOnce(of(pagina([], 10)));
+    servicio.listar.mockReturnValueOnce(of(pagina([ana], 10)));
+
+    fixture.componentInstance.cargar();
+
+    expect(ultimaLlamada()).toEqual(['', false, 2, 5]);
   });
 
   it('avisa_si_no_hay_clientes', async () => {
     const fixture = await crear();
-    servicio.listar.mockReturnValue(of([]));
+    servicio.listar.mockReturnValue(of(pagina([])));
 
     fixture.componentInstance.buscar('zzz');
     await fixture.whenStable();
@@ -188,7 +237,7 @@ describe('Clientes', () => {
     const fixture = await crear();
     servicio.listar.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
     fixture.componentInstance.buscar('x');
-    servicio.listar.mockReturnValue(of([ana]));
+    servicio.listar.mockReturnValue(of(pagina([ana])));
 
     fixture.componentInstance.buscar('ana');
     await fixture.whenStable();

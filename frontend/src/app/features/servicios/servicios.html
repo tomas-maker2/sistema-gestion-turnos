@@ -13,7 +13,8 @@
     </mat-slide-toggle>
   </div>
 
-  <app-grilla [columnas]="columnas" [filas]="filas()" mensajeVacio="No hay servicios.">
+  <app-grilla [columnas]="columnas" [filas]="filas()" [total]="paginado.total()" [pagina]="paginado.pagina()" [tamanio]="paginado.tamanio()"
+             mensajeVacio="No hay servicios." (paginaCambiada)="cambiarPagina($event)">
     <ng-template #acciones let-s>
       <button mat-icon-button type="button" aria-label="Editar" matTooltip="Editar" (click)="editar(s)">
         <mat-icon>edit</mat-icon>

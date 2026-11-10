@@ -12,7 +12,8 @@ namespace GestionTurnos.Api.Controllers;
 public class UsuariosController(UsuarioService servicio) : ControllerBase
 {
     [HttpGet]
-    public Task<List<UsuarioDto>> Listar() => servicio.ListarAsync();
+    public Task<PaginaDto<UsuarioDto>> Listar(int pagina = 1, int tamanio = Paginacion.TamanioPorDefecto) =>
+        servicio.ListarAsync(pagina, tamanio);
 
     [HttpGet("{id:int}")]
     public Task<UsuarioDto> Obtener(int id) => servicio.ObtenerAsync(id);

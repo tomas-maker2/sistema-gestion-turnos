@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../../core/api-config';
+import { Pagina, TAMANIO_POR_DEFECTO } from '../../shared/paginado';
 
 export interface Cliente {
   id: number;
@@ -20,11 +21,11 @@ export class ClientesService {
   private readonly http = inject(HttpClient);
   private readonly url = `${API_URL}/clientes`;
 
-  listar(texto = '', incluirInactivos = false): Observable<Cliente[]> {
-    let params = new HttpParams();
+  listar(texto = '', incluirInactivos = false, pagina = 1, tamanio = TAMANIO_POR_DEFECTO): Observable<Pagina<Cliente>> {
+    let params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
     if (texto.trim()) params = params.set('texto', texto.trim());
     if (incluirInactivos) params = params.set('incluirInactivos', true);
-    return this.http.get<Cliente[]>(this.url, { params });
+    return this.http.get<Pagina<Cliente>>(this.url, { params });
   }
 
   crear(datos: ClienteDatos): Observable<Cliente> {

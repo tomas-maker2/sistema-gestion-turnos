@@ -9,8 +9,8 @@ namespace GestionTurnos.Api.Services;
 
 public class UsuarioService(AppDbContext db, IPasswordHasher<Usuario> hasher)
 {
-    public async Task<List<UsuarioDto>> ListarAsync() =>
-        await db.Usuarios.OrderBy(u => u.NombreUsuario).Select(u => Mapear(u)).ToListAsync();
+    public Task<PaginaDto<UsuarioDto>> ListarAsync(int pagina, int tamanio) =>
+        Paginacion.PaginarAsync(db.Usuarios.OrderBy(u => u.NombreUsuario), pagina, tamanio, Mapear);
 
     public async Task<UsuarioDto> ObtenerAsync(int id) => Mapear(await BuscarAsync(id));
 

@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { EMPTY, Observable, Subject, catchError, switchMap } from 'rxjs';
 import { ConfirmarDialog } from '../../shared/confirmar-dialog';
 import { mensajeDeError } from '../../shared/errores';
 import { ColumnaGrilla, Grilla } from '../../shared/grilla/grilla';
+import { CambioDePagina, EstadoPaginado } from '../../shared/paginado';
 import { ClienteForm } from './cliente-form';
 import { Cliente, ClientesService } from './clientes.service';
 
@@ -38,6 +39,7 @@ export class Clientes {
   readonly filas = signal<Cliente[]>([]);
   readonly texto = signal('');
   readonly inactivos = signal(false);
+  readonly paginado = new EstadoPaginado();
 
   // Cada recarga cancela la anterior, así una respuesta lenta no pisa a una más nueva
   private readonly recarga = new Subject<void>();
@@ -46,7 +48,7 @@ export class Clientes {
     this.recarga
       .pipe(
         switchMap(() =>
-          this.servicio.listar(this.texto(), this.inactivos()).pipe(
+          this.servicio.listar(this.texto(), this.inactivos(), this.paginado.pagina(), this.paginado.tamanio()).pipe(
             catchError((e: HttpErrorResponse) => {
               this.avisarError(e);
               return EMPTY;
@@ -55,7 +57,11 @@ export class Clientes {
         ),
         takeUntilDestroyed(),
       )
-      .subscribe((clientes) => this.filas.set(clientes));
+      .subscribe((pagina) => {
+        this.filas.set(pagina.items);
+        // Si la página quedó vacía (se dio de baja lo último que tenía), se pide la anterior
+        if (this.paginado.actualizar(pagina.total, pagina.items.length)) this.cargar();
+      });
     this.cargar();
   }
 
@@ -65,11 +71,18 @@ export class Clientes {
 
   buscar(texto: string): void {
     this.texto.set(texto);
+    this.paginado.volverALaPrimera();
     this.cargar();
   }
 
   mostrarInactivos(mostrar: boolean): void {
     this.inactivos.set(mostrar);
+    this.paginado.volverALaPrimera();
+    this.cargar();
+  }
+
+  cambiarPagina(cambio: CambioDePagina): void {
+    this.paginado.cambiar(cambio);
     this.cargar();
   }
 

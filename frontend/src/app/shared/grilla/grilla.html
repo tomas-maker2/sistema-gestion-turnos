@@ -1,3 +1,14 @@
+<mat-paginator
+  class="paginador"
+  aria-label="Paginado"
+  showFirstLastButtons
+  [length]="total()"
+  [pageIndex]="pagina() - 1"
+  [pageSize]="tamanio()"
+  [pageSizeOptions]="tamaniosDePagina"
+  (page)="alCambiarLaPagina($event)"
+/>
+
 <div class="contenedor">
   <table>
     <thead>

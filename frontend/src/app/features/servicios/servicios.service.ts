@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../../core/api-config';
+import { Pagina, TAMANIO_POR_DEFECTO } from '../../shared/paginado';
 
 export interface Servicio {
   id: number;
@@ -18,10 +19,10 @@ export class ServiciosService {
   private readonly http = inject(HttpClient);
   private readonly url = `${API_URL}/servicios`;
 
-  listar(incluirInactivos = false): Observable<Servicio[]> {
-    let params = new HttpParams();
+  listar(incluirInactivos = false, pagina = 1, tamanio = TAMANIO_POR_DEFECTO): Observable<Pagina<Servicio>> {
+    let params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
     if (incluirInactivos) params = params.set('incluirInactivos', true);
-    return this.http.get<Servicio[]>(this.url, { params });
+    return this.http.get<Pagina<Servicio>>(this.url, { params });
   }
 
   crear(datos: ServicioDatos): Observable<Servicio> {

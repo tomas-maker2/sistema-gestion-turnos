@@ -1,4 +1,4 @@
-using GestionTurnos.Api.Data;
+﻿using GestionTurnos.Api.Data;
 using GestionTurnos.Api.Dtos;
 using GestionTurnos.Api.Errors;
 using GestionTurnos.Api.Models;
@@ -53,9 +53,9 @@ public class ClienteServiceTests
         await _servicio.CrearAsync(Pedido("Luis", "Anaya"));
         await _servicio.CrearAsync(Pedido("Carlos", "Gómez"));
 
-        var lista = await _servicio.ListarAsync("ANA", false);
+        var lista = await _servicio.ListarAsync("ANA", false, 1, 5);
 
-        Assert.Equal(["Anaya", "Pérez"], lista.Select(c => c.Apellido));
+        Assert.Equal(["Anaya", "Pérez"], lista.Items.Select(c => c.Apellido));
     }
 
     [Fact]
@@ -65,8 +65,8 @@ public class ClienteServiceTests
         await _servicio.CrearAsync(Pedido("Luis", "Gómez"));
         await _servicio.DesactivarAsync(ana.Id);
 
-        Assert.Equal(["Gómez"], (await _servicio.ListarAsync(null, false)).Select(c => c.Apellido));
-        Assert.Equal(2, (await _servicio.ListarAsync(null, true)).Count);
+        Assert.Equal(["Gómez"], (await _servicio.ListarAsync(null, false, 1, 5)).Items.Select(c => c.Apellido));
+        Assert.Equal(2, (await _servicio.ListarAsync(null, true, 1, 5)).Total);
     }
 
     [Fact]
@@ -76,9 +76,40 @@ public class ClienteServiceTests
         await _servicio.CrearAsync(Pedido("Ana", "Gómez"));
         await _servicio.CrearAsync(Pedido("Beto", "Alonso"));
 
-        var lista = await _servicio.ListarAsync(null, false);
+        var lista = await _servicio.ListarAsync(null, false, 1, 5);
 
-        Assert.Equal(["Alonso Beto", "Gómez Ana", "Gómez Zoe"], lista.Select(c => $"{c.Apellido} {c.Nombre}"));
+        Assert.Equal(["Alonso Beto", "Gómez Ana", "Gómez Zoe"], lista.Items.Select(c => $"{c.Apellido} {c.Nombre}"));
+    }
+
+    [Fact]
+    public async Task Listar_pagina_sobre_los_resultados_filtrados_y_el_total_es_el_del_filtro()
+    {
+        for (var i = 1; i <= 6; i++) await _servicio.CrearAsync(Pedido($"Ana{i}", "Gómez"));
+        await _servicio.CrearAsync(Pedido("Luis", "Pérez"));
+
+        var primera = await _servicio.ListarAsync("ana", false, 1, 5);
+        var segunda = await _servicio.ListarAsync("ana", false, 2, 5);
+
+        Assert.Equal(6, primera.Total);
+        Assert.Equal(5, primera.Items.Count);
+        Assert.Single(segunda.Items);
+    }
+
+    [Fact]
+    public async Task Listar_cuenta_los_inactivos_en_el_total_solo_si_se_piden()
+    {
+        for (var i = 1; i <= 7; i++) await _servicio.CrearAsync(Pedido($"C{i}", "Z"));
+        var inactivo = (await _servicio.ListarAsync(null, false, 1, 5)).Items[0];
+        await _servicio.DesactivarAsync(inactivo.Id);
+
+        Assert.Equal(6, (await _servicio.ListarAsync(null, false, 1, 5)).Total);
+        Assert.Equal(7, (await _servicio.ListarAsync(null, true, 1, 5)).Total);
+    }
+
+    [Fact]
+    public async Task Listar_con_tamanio_no_permitido_lanza_Validacion()
+    {
+        await Assert.ThrowsAsync<ValidacionException>(() => _servicio.ListarAsync(null, false, 1, 7));
     }
 
     [Fact]

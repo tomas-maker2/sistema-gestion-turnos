@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../../core/api-config';
 import { Rol } from '../../core/auth.service';
+import { Pagina, TAMANIO_POR_DEFECTO } from '../../shared/paginado';
 
 export interface Usuario {
   id: number;
@@ -30,8 +31,9 @@ export class UsuariosService {
   private readonly http = inject(HttpClient);
   private readonly url = `${API_URL}/usuarios`;
 
-  listar(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(this.url);
+  listar(pagina = 1, tamanio = TAMANIO_POR_DEFECTO): Observable<Pagina<Usuario>> {
+    const params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
+    return this.http.get<Pagina<Usuario>>(this.url, { params });
   }
 
   crear(datos: UsuarioCrear): Observable<Usuario> {

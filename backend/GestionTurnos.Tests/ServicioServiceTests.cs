@@ -1,4 +1,4 @@
-using GestionTurnos.Api.Data;
+﻿using GestionTurnos.Api.Data;
 using GestionTurnos.Api.Dtos;
 using GestionTurnos.Api.Errors;
 using GestionTurnos.Api.Services;
@@ -63,8 +63,27 @@ public class ServicioServiceTests
         await _servicio.CrearAsync(new ServicioRequest("Color", 90));
         await _servicio.DesactivarAsync(barba.Id);
 
-        Assert.Equal(["Color", "Peinado"], (await _servicio.ListarAsync(false)).Select(s => s.Nombre));
-        Assert.Equal(["Barba", "Color", "Peinado"], (await _servicio.ListarAsync(true)).Select(s => s.Nombre));
+        Assert.Equal(["Color", "Peinado"], (await _servicio.ListarAsync(false, 1, 5)).Items.Select(s => s.Nombre));
+        Assert.Equal(["Barba", "Color", "Peinado"], (await _servicio.ListarAsync(true, 1, 5)).Items.Select(s => s.Nombre));
+    }
+
+    [Fact]
+    public async Task Listar_pagina_los_resultados_ordenados_y_devuelve_el_total()
+    {
+        for (var i = 1; i <= 7; i++) await _servicio.CrearAsync(new ServicioRequest($"S{i}", 30));
+
+        var primera = await _servicio.ListarAsync(false, 1, 5);
+        var segunda = await _servicio.ListarAsync(false, 2, 5);
+
+        Assert.Equal(["S1", "S2", "S3", "S4", "S5"], primera.Items.Select(s => s.Nombre));
+        Assert.Equal(["S6", "S7"], segunda.Items.Select(s => s.Nombre));
+        Assert.Equal(7, primera.Total);
+    }
+
+    [Fact]
+    public async Task Listar_con_pagina_cero_lanza_Validacion()
+    {
+        await Assert.ThrowsAsync<ValidacionException>(() => _servicio.ListarAsync(false, 0, 5));
     }
 
     [Fact]

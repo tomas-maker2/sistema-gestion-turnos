@@ -15,18 +15,22 @@ describe('ClientesService', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  it('listar_sin_filtros_no_envia_parametros', () => {
+  it('listar_sin_filtros_pide_la_primera_pagina_de_5_y_nada_mas', () => {
     servicio.listar().subscribe();
     const pedido = http.expectOne((r) => r.url === `${API_URL}/clientes`);
     expect(pedido.request.method).toBe('GET');
-    expect(pedido.request.params.keys()).toEqual([]);
+    expect(pedido.request.params.keys().sort()).toEqual(['pagina', 'tamanio']);
+    expect(pedido.request.params.get('pagina')).toBe('1');
+    expect(pedido.request.params.get('tamanio')).toBe('5');
   });
 
-  it('listar_envia_texto_e_incluirInactivos', () => {
-    servicio.listar('ana', true).subscribe();
+  it('listar_envia_texto_incluirInactivos_pagina_y_tamanio', () => {
+    servicio.listar('ana', true, 3, 30).subscribe();
     const pedido = http.expectOne((r) => r.url === `${API_URL}/clientes`);
     expect(pedido.request.params.get('texto')).toBe('ana');
     expect(pedido.request.params.get('incluirInactivos')).toBe('true');
+    expect(pedido.request.params.get('pagina')).toBe('3');
+    expect(pedido.request.params.get('tamanio')).toBe('30');
   });
 
   it('listar_ignora_un_texto_en_blanco', () => {

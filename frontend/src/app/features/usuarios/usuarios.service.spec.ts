@@ -14,9 +14,19 @@ describe('UsuariosService', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  it('listar_pide_GET_a_usuarios', () => {
+  it('listar_pide_la_pagina_y_el_tamanio', () => {
+    servicio.listar(2, 10).subscribe();
+    const pedido = http.expectOne((r) => r.url === `${API_URL}/usuarios`);
+    expect(pedido.request.method).toBe('GET');
+    expect(pedido.request.params.get('pagina')).toBe('2');
+    expect(pedido.request.params.get('tamanio')).toBe('10');
+  });
+
+  it('listar_sin_argumentos_pide_la_primera_pagina_de_5', () => {
     servicio.listar().subscribe();
-    expect(http.expectOne(`${API_URL}/usuarios`).request.method).toBe('GET');
+    const pedido = http.expectOne((r) => r.url === `${API_URL}/usuarios`);
+    expect(pedido.request.params.get('pagina')).toBe('1');
+    expect(pedido.request.params.get('tamanio')).toBe('5');
   });
 
   it('crear_envia_POST_con_los_datos', () => {

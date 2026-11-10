@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,9 +16,10 @@ describe('Usuarios', () => {
 
   const admin: Usuario = { id: 1, nombreUsuario: 'admin', nombreCompleto: 'Administrador', rol: 'Admin', activo: true };
   const ana: Usuario = { id: 2, nombreUsuario: 'ana', nombreCompleto: 'Ana Pérez', rol: 'Operador', activo: false };
+  const pagina = (items: Usuario[], total = items.length) => ({ items, total, pagina: 1, tamanio: 5 });
 
   async function crear() {
-    servicio = { listar: vi.fn().mockReturnValue(of([admin, ana])), desactivar: vi.fn(), modificar: vi.fn() };
+    servicio = { listar: vi.fn().mockReturnValue(of(pagina([admin, ana]))), desactivar: vi.fn(), modificar: vi.fn() };
     dialogo = { open: vi.fn() };
     aviso = { open: vi.fn() };
     TestBed.configureTestingModule({
@@ -61,9 +62,50 @@ describe('Usuarios', () => {
     expect(activo.classList).not.toContain('inactiva');
   });
 
+  it('carga_la_primera_pagina_de_5', async () => {
+    await crear();
+    expect(servicio.listar).toHaveBeenCalledWith(1, 5);
+  });
+
+  it('la_grilla_muestra_el_total_que_informa_la_API', async () => {
+    const fixture = await crear();
+    servicio.listar.mockReturnValue(of(pagina([admin], 23)));
+
+    fixture.componentInstance.cargar();
+
+    expect(fixture.componentInstance.paginado.total()).toBe(23);
+  });
+
+  it('cambiar_de_pagina_recarga_con_la_pagina_pedida', async () => {
+    const fixture = await crear();
+
+    fixture.componentInstance.cambiarPagina({ pagina: 2, tamanio: 5 });
+
+    expect(servicio.listar).toHaveBeenLastCalledWith(2, 5);
+  });
+
+  it('cambiar_el_tamanio_recarga_con_el_tamanio_pedido', async () => {
+    const fixture = await crear();
+
+    fixture.componentInstance.cambiarPagina({ pagina: 1, tamanio: 30 });
+
+    expect(servicio.listar).toHaveBeenLastCalledWith(1, 30);
+  });
+
+  it('si_la_pagina_queda_vacia_pide_la_ultima_que_tiene_datos', async () => {
+    const fixture = await crear();
+    fixture.componentInstance.cambiarPagina({ pagina: 3, tamanio: 5 });
+    servicio.listar.mockReturnValueOnce(of(pagina([], 10)));
+    servicio.listar.mockReturnValueOnce(of(pagina([admin], 10)));
+
+    fixture.componentInstance.cargar();
+
+    expect(servicio.listar).toHaveBeenLastCalledWith(2, 5);
+  });
+
   it('avisa_si_no_hay_usuarios', async () => {
     const fixture = await crear();
-    servicio.listar.mockReturnValue(of([]));
+    servicio.listar.mockReturnValue(of(pagina([])));
 
     fixture.componentInstance.cargar();
     await fixture.whenStable();

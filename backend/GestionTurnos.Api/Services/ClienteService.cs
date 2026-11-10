@@ -9,7 +9,7 @@ namespace GestionTurnos.Api.Services;
 
 public class ClienteService(AppDbContext db)
 {
-    public async Task<List<ClienteDto>> ListarAsync(string? texto, bool incluirInactivos)
+    public Task<PaginaDto<ClienteDto>> ListarAsync(string? texto, bool incluirInactivos, int pagina, int tamanio)
     {
         var consulta = db.Clientes.AsQueryable();
 
@@ -22,7 +22,9 @@ public class ClienteService(AppDbContext db)
             consulta = consulta.Where(c => c.Nombre.ToLower().Contains(t) || c.Apellido.ToLower().Contains(t));
         }
 
-        return await consulta.OrderBy(c => c.Apellido).ThenBy(c => c.Nombre).Select(c => Mapear(c)).ToListAsync();
+        // El Id desempata, así los clientes con igual nombre no cambian de lugar entre páginas
+        var ordenada = consulta.OrderBy(c => c.Apellido).ThenBy(c => c.Nombre).ThenBy(c => c.Id);
+        return Paginacion.PaginarAsync(ordenada, pagina, tamanio, Mapear);
     }
 
     public async Task<ClienteDto> ObtenerAsync(int id) => Mapear(await BuscarAsync(id));

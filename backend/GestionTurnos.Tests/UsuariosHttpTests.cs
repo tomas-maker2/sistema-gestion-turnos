@@ -76,12 +76,45 @@ public class UsuariosHttpTests : IClassFixture<ApiFactory>
         // Fábrica propia: la base compartida de la clase tiene más usuarios
         using var fabrica = new ApiFactory();
         var cliente = await fabrica.ClienteConRol(Rol.Admin);
-        var yo = (await cliente.GetFromJsonAsync<List<UsuarioListado>>("/api/usuarios"))!.Single();
+        var yo = (await cliente.GetFromJsonAsync<PaginaDeUsuarios>("/api/usuarios"))!.Items.Single();
 
         var respuesta = await cliente.DeleteAsync($"/api/usuarios/{yo.Id}");
 
         Assert.Equal(HttpStatusCode.Conflict, respuesta.StatusCode);
     }
 
+    [Fact]
+    public async Task Listado_devuelve_items_total_pagina_y_tamanio()
+    {
+        using var fabrica = new ApiFactory();
+        var cliente = await fabrica.ClienteConRol(Rol.Admin);
+        for (var i = 1; i <= 6; i++) await cliente.PostAsJsonAsync("/api/usuarios", NuevoUsuario($"pag{i}"));
+
+        var primera = (await cliente.GetFromJsonAsync<PaginaDeUsuarios>("/api/usuarios"))!;
+        var segunda = (await cliente.GetFromJsonAsync<PaginaDeUsuarios>("/api/usuarios?pagina=2&tamanio=5"))!;
+
+        Assert.Equal(5, primera.Items.Count);
+        Assert.Equal(7, primera.Total); // los 6 creados más el administrador que hizo la consulta
+        Assert.Equal(1, primera.Pagina);
+        Assert.Equal(5, primera.Tamanio);
+        Assert.Equal(2, segunda.Items.Count);
+        Assert.Equal(2, segunda.Pagina);
+    }
+
+    [Theory]
+    [InlineData("tamanio=7")]
+    [InlineData("tamanio=0")]
+    [InlineData("tamanio=101")]
+    [InlineData("pagina=0")]
+    [InlineData("pagina=-1")]
+    public async Task Listado_con_parametros_de_paginacion_invalidos_responde_400(string consulta)
+    {
+        var cliente = await _fabrica.ClienteConRol(Rol.Admin);
+        var respuesta = await cliente.GetAsync($"/api/usuarios?{consulta}");
+        Assert.Equal(HttpStatusCode.BadRequest, respuesta.StatusCode);
+    }
+
     private record UsuarioListado(int Id);
+
+    private record PaginaDeUsuarios(List<UsuarioListado> Items, int Total, int Pagina, int Tamanio);
 }

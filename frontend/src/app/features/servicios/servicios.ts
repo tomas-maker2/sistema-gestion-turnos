@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { ConfirmarDialog } from '../../shared/confirmar-dialog';
 import { mensajeDeError } from '../../shared/errores';
 import { ColumnaGrilla, Grilla } from '../../shared/grilla/grilla';
+import { CambioDePagina, EstadoPaginado, Pagina } from '../../shared/paginado';
 import { ServicioForm } from './servicio-form';
 import { Servicio, ServiciosService } from './servicios.service';
 
@@ -30,20 +31,27 @@ export class Servicios {
   ];
   readonly filas = signal<Servicio[]>([]);
   readonly inactivos = signal(false);
+  readonly paginado = new EstadoPaginado();
 
   constructor() {
     this.cargar();
   }
 
   cargar(): void {
-    this.servicio.listar(this.inactivos()).subscribe({
-      next: (servicios) => this.filas.set(servicios),
+    this.servicio.listar(this.inactivos(), this.paginado.pagina(), this.paginado.tamanio()).subscribe({
+      next: (pagina) => this.mostrar(pagina),
       error: (e: HttpErrorResponse) => this.avisarError(e),
     });
   }
 
   mostrarInactivos(mostrar: boolean): void {
     this.inactivos.set(mostrar);
+    this.paginado.volverALaPrimera();
+    this.cargar();
+  }
+
+  cambiarPagina(cambio: CambioDePagina): void {
+    this.paginado.cambiar(cambio);
     this.cargar();
   }
 
@@ -73,6 +81,12 @@ export class Servicios {
   reactivar(servicio: Servicio): void {
     const { id, ...datos } = servicio;
     this.ejecutar(this.servicio.modificar(id, { ...datos, activo: true }), 'Servicio reactivado');
+  }
+
+  private mostrar(pagina: Pagina<Servicio>): void {
+    this.filas.set(pagina.items);
+    // Si la página quedó vacía (se dio de baja lo último que tenía), se pide la anterior
+    if (this.paginado.actualizar(pagina.total, pagina.items.length)) this.cargar();
   }
 
   private abrirFormulario(servicio: Servicio | null): void {

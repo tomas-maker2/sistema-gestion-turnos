@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using GestionTurnos.Api.Models;
 
@@ -57,6 +57,51 @@ public class ClientesServiciosHttpTests : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task Listado_de_servicios_sin_parametros_trae_5_por_pagina_y_el_total()
+    {
+        using var fabrica = new ApiFactory();
+        var http = await fabrica.ClienteConRol(Rol.Operador);
+        for (var i = 1; i <= 7; i++)
+            await http.PostAsJsonAsync("/api/servicios", new { nombre = $"Servicio {i}", duracionMinutos = 30 });
+
+        var primera = (await http.GetFromJsonAsync<PaginaDeServicios>("/api/servicios"))!;
+        var segunda = (await http.GetFromJsonAsync<PaginaDeServicios>("/api/servicios?pagina=2"))!;
+
+        Assert.Equal(5, primera.Items.Count);
+        Assert.Equal(7, primera.Total);
+        Assert.Equal(5, primera.Tamanio);
+        Assert.Equal(2, segunda.Items.Count);
+    }
+
+    [Fact]
+    public async Task Listado_de_clientes_pagina_sobre_la_busqueda()
+    {
+        using var fabrica = new ApiFactory();
+        var http = await fabrica.ClienteConRol(Rol.Operador);
+        for (var i = 1; i <= 6; i++) await http.PostAsJsonAsync("/api/clientes", Cliente($"Busca{i}"));
+        await http.PostAsJsonAsync("/api/clientes", Cliente("Otro"));
+
+        var pagina = (await http.GetFromJsonAsync<PaginaDeServicios>("/api/clientes?texto=busca&tamanio=5"))!;
+
+        Assert.Equal(5, pagina.Items.Count);
+        Assert.Equal(6, pagina.Total); // el total es el de la búsqueda, no el de todos los clientes
+    }
+
+    [Theory]
+    [InlineData("/api/clientes?tamanio=7")]
+    [InlineData("/api/clientes?pagina=0")]
+    [InlineData("/api/servicios?tamanio=101")]
+    [InlineData("/api/servicios?pagina=-3")]
+    public async Task Listado_con_parametros_de_paginacion_invalidos_responde_400(string ruta)
+    {
+        var cliente = await _fabrica.ClienteConRol(Rol.Operador);
+        Assert.Equal(HttpStatusCode.BadRequest, (await cliente.GetAsync(ruta)).StatusCode);
+    }
+
+    // Sirve para leer cualquiera de las páginas (solo interesan estos campos)
+    private record PaginaDeServicios(List<System.Text.Json.JsonElement> Items, int Total, int Pagina, int Tamanio);
+
+    [Fact]
     public async Task Cliente_inexistente_responde_404()
     {
         var cliente = await _fabrica.ClienteConRol(Rol.Operador);
@@ -105,8 +150,8 @@ public class ClientesServiciosHttpTests : IClassFixture<ApiFactory>
         var url = creado.Headers.Location!.ToString();
 
         var baja = await cliente.DeleteAsync(url);
-        var lista = await (await cliente.GetAsync("/api/servicios")).Content.ReadAsStringAsync();
-        var conInactivos = await (await cliente.GetAsync("/api/servicios?incluirInactivos=true")).Content.ReadAsStringAsync();
+        var lista = await (await cliente.GetAsync("/api/servicios?tamanio=100")).Content.ReadAsStringAsync();
+        var conInactivos = await (await cliente.GetAsync("/api/servicios?incluirInactivos=true&tamanio=100")).Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.NoContent, baja.StatusCode);
         Assert.DoesNotContain("Para baja", lista);
