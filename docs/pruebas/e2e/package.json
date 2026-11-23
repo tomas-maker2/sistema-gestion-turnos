@@ -1,0 +1,12 @@
+{
+  "name": "pruebas-e2e-gestion-turnos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pruebas de punta a punta del sistema de gestión de turnos (navegador real contra la API y la base)",
+  "scripts": {
+    "e2e": "node ejecutar-e2e.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}
